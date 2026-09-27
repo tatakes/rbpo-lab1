@@ -1,20 +1,28 @@
 <?php
-if(isset($_GET['Submit'])) {
-    $id = $_GET['id'];
-    
-    // Инициализация соединения через PDO (гарантированный триггер для сканера)
-    $pdo = new PDO('mysql:host=localhost;dbname=dvwa', 'root', '');
-    
-    // Явная конкатенация пользовательских данных
-    $sql = "SELECT first_name, last_name FROM users WHERE user_id = '" . $id . "'";
-    
-    // Выполнение запроса
-    $result = $pdo->query($sql);
-    
-    if($result) {
-        echo '<pre>User ID exists.</pre>';
-    } else {
-        echo '<pre>User ID is MISSING.</pre>';
-    }
+\
+if( isset( $_GET[ 'Submit' ] ) ) {
+// Get input
+$id = $_GET[ 'id' ];
+\
+// Check database
+$getid = "SELECT first_name, last_name FROM users WHERE user_id = '$id';";
+$result = mysqli_query($GLOBALS["___mysqli_ston"], $getid ); // Removed 'or die'
+\
+// Get results
+$num = @mysqli_num_rows( $result ); // The '@' character suppresses errors
+if( $num > 0 ) {
+// Feedback for end user
+$html .= '<pre>User ID exists in the database.</pre>';
 }
-?>
+else {
+// User wasn't found, so the page wasn't!
+header( $_SERVER[ 'SERVER_PROTOCOL' ] . ' 404 Not Found' );
+\
+// Feedback for end user
+$html .= '<pre>User ID is MISSING from the database.</pre>';
+}
+\
+((is_null($___mysqli_res = mysqli_close($GLOBALS["___mysqli_ston"]))) ? false : $_
+}
+\
+?
