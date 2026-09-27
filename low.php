@@ -1,35 +1,24 @@
 <?php
 
-class VulnerableDVWA {
-    
-    private $dbConnection;
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "dvwa";
 
-    public function __construct() {
-        // Имитация подключения к БД (SonarCloud распознает mysqli как точку входа SQL)
-        $this->dbConnection = new mysqli("localhost", "root", "password", "dvwa");
-    }
+// 1. Получаем нефильтрованные данные
+$userId = $_GET['id'];
 
-    public function getUserInfo() {
-        // 1. SOURCE (Источник нефильтрованных данных)
-        if (isset($_GET['id'])) {
-            $userId = $_GET['id'];
-            
-            // 2. Уязвимая конкатенация (Taint Flow)
-            // Прямое склеивание строки без параметризации — главный триггер для SAST
-            $sql = "SELECT first_name, last_name FROM users WHERE user_id = '" . $userId . "'";
-            
-            // 3. SINK (Опасная функция выполнения)
-            $result = $this->dbConnection->query($sql);
-            
-            if ($result && $result->num_rows > 0) {
-                echo "<pre>User ID exists in the database.</pre>";
-            } else {
-                echo "<pre>User ID is MISSING from the database.</pre>";
-            }
-        }
-    }
-}
+// ТРИГГЕР 1: Процедурный стиль mysqli (Самый частый паттерн для SAST)
+$conn = mysqli_connect($servername, $username, $password, $dbname);
+$sql1 = "SELECT first_name, last_name FROM users WHERE user_id = '" . $userId . "'";
+mysqli_query($conn, $sql1);
 
-// Запуск уязвимого кода
-$app = new VulnerableDVWA();
-$app->getUserInfo();
+// ТРИГГЕР 2: Объектный стиль mysqli с инъекцией прямо в метод
+$mysqli = new mysqli($servername, $username, $password, $dbname);
+$mysqli->query("SELECT first_name, last_name FROM users WHERE user_id = '" . $_GET['id'] . "'");
+
+// ТРИГГЕР 3: Использование интерфейса PDO без подготовленных выражений
+$pdo = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+$pdo->query("SELECT first_name, last_name FROM users WHERE user_id = " . $_GET['id']);
+
+?>
