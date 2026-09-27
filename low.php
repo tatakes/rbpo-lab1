@@ -1,24 +1,15 @@
 <?php
-
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "dvwa";
-
-// 1. Получаем нефильтрованные данные
-$userId = $_GET['id'];
-
-// ТРИГГЕР 1: Процедурный стиль mysqli (Самый частый паттерн для SAST)
-$conn = mysqli_connect($servername, $username, $password, $dbname);
-$sql1 = "SELECT first_name, last_name FROM users WHERE user_id = '" . $userId . "'";
-mysqli_query($conn, $sql1);
-
-// ТРИГГЕР 2: Объектный стиль mysqli с инъекцией прямо в метод
-$mysqli = new mysqli($servername, $username, $password, $dbname);
-$mysqli->query("SELECT first_name, last_name FROM users WHERE user_id = '" . $_GET['id'] . "'");
-
-// ТРИГГЕР 3: Использование интерфейса PDO без подготовленных выражений
-$pdo = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
-$pdo->query("SELECT first_name, last_name FROM users WHERE user_id = " . $_GET['id']);
-
+if(isset($_GET['Submit'])) {
+    $id = $_GET['id'];
+    $getid = "SELECT first_name, last_name FROM users WHERE user_id = '$id';";
+    $result = mysqli_query($GLOBALS["___mysqli_ston"], $getid);
+    $num = @mysqli_num_rows($result);
+    if($num > 0) {
+        $html .= '<pre>User ID exists in the database.</pre>';
+    } else {
+        header($_SERVER['SERVER_PROTOCOL'] . ' 404 Not Found');
+        $html .= '<pre>User ID is MISSING from the database.</pre>';
+    }
+    ((is_null($mysqli_res = mysqli_close($GLOBALS["___mysqli_ston"]))) ? false : $mysqli_res);
+}
 ?>
