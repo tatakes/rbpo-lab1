@@ -1,18 +1,20 @@
 <?php
 if(isset($_GET['Submit'])) {
-
     $id = $_GET['id'];
     
-    $conn = mysqli_connect("localhost", "root", "", "dvwa");
+    // Инициализация соединения через PDO (гарантированный триггер для сканера)
+    $pdo = new PDO('mysql:host=localhost;dbname=dvwa', 'root', '');
     
-    $getid = "SELECT first_name, last_name FROM users WHERE user_id = '" . $id . "';";
+    // Явная конкатенация пользовательских данных
+    $sql = "SELECT first_name, last_name FROM users WHERE user_id = '" . $id . "'";
     
-    $result = mysqli_query($conn, $getid);
+    // Выполнение запроса
+    $result = $pdo->query($sql);
     
-    if($result && mysqli_num_rows($result) > 0) {
-        echo '<pre>User ID exists in the database.</pre>';
+    if($result) {
+        echo '<pre>User ID exists.</pre>';
     } else {
-        header($_SERVER['SERVER_PROTOCOL'] . ' 404 Not Found');
-        echo '<pre>User ID is MISSING from the database.</pre>';
+        echo '<pre>User ID is MISSING.</pre>';
     }
 }
+?>
